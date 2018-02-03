@@ -1,8 +1,15 @@
 package controllers;
 
 import db.dao.exceptions.CourseDaoException;
+import db.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+import org.springframework.web.servlet.ModelAndView;
 import services.ServiceForComment;
 import services.ServiceForWorkUserAndCourse;
 
@@ -14,29 +21,16 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 
-@WebServlet("/inner/buy")
-public class ControllerBuyCourse extends HttpServlet{
+@Controller
+@SessionAttributes("user")
+public class ControllerBuyCourse {
     @Autowired
     ServiceForWorkUserAndCourse serviceForWorkUserAndCourse;
 
-    public void init() throws ServletException {
-        super.init();
-        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this,
-                getServletContext());
-    }
-
-    @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        int idUser = (int) req.getSession().getAttribute("id_user");
-        int idCourse = Integer.parseInt(req.getParameter("id_course"));
-        try {
-            serviceForWorkUserAndCourse.addCourseInProfil(idUser
-                    , idCourse);
-            req.getRequestDispatcher("/courses").forward(req, resp);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (CourseDaoException e) {
-            e.printStackTrace();
-        }
+    @RequestMapping("/inner/buy")
+    public String buyCourse(@RequestParam("id_course") Integer id_course,
+                            @ModelAttribute("user") User user) throws SQLException, CourseDaoException {
+        serviceForWorkUserAndCourse.addCourseInProfil(user.getId(), id_course);
+        return "forward:/courses";
     }
 }

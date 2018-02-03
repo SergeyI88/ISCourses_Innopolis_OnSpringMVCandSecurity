@@ -42,4 +42,9 @@ public class ServiceShowAndGetCources {
         List<Course> listTop = courseDao.returnTopTen();
         return listTop;
     }
+
+    public List<Course> getAllCoursesWithRaiting() throws SQLException, CourseDaoException {
+        List<Course> list = courseDao.returnAllList();
+        return list;
+    }
 }

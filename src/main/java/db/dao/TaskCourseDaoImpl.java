@@ -104,10 +104,14 @@ public class TaskCourseDaoImpl implements TaskCourseDao {
             statement.setInt(1, id_user);
             statement.setInt(2, id_course);
             ResultSet set = statement.executeQuery();
-            set.next();
-            System.out.println(set.isFirst());
-            return set.getInt("id_currency_task");
+            boolean res = set.next();
+            if (res) {
+                return set.getInt("id_currency_task");
+            } else {
+                return 0;
+            }
         } catch (SQLException e) {
+            e.printStackTrace();
             logger.error("exception in task dao");
             throw new TaskCourseDaoException();
         }
@@ -124,19 +128,22 @@ public class TaskCourseDaoImpl implements TaskCourseDao {
             statement.setInt(1, numberInCourse);
             statement.setInt(2, id_course);
             ResultSet set = statement.executeQuery();
-            set.next();
-            TaskCourse taskCourse = new TaskCourse();
-            taskCourse.setId(set.getInt("id"));
-            taskCourse.setId_course(set.getInt("id_course"));
-            taskCourse.setName(set.getString("name"));
-            taskCourse.setDescription(set.getString("description"));
-            taskCourse.setAnswer(set.getString("answer"));
-            taskCourse.setTask(set.getString("task"));
-            taskCourse.setNumber_in_sub_course(set.getInt("number_in_course"));
-            System.out.println("ВАЖНО");
-            System.out.println(set.getInt("id"));
-            System.out.println(set.getInt("id"));
-            return taskCourse;
+            boolean res = set.next();
+            if (res) {
+                TaskCourse taskCourse = new TaskCourse();
+                taskCourse.setId(set.getInt("id"));
+                taskCourse.setId_course(set.getInt("id_course"));
+                taskCourse.setName(set.getString("name"));
+                taskCourse.setDescription(set.getString("description"));
+                taskCourse.setAnswer(set.getString("answer"));
+                taskCourse.setTask(set.getString("task"));
+                taskCourse.setNumber_in_sub_course(set.getInt("number_in_course"));
+                System.out.println(set.getInt("id"));
+                System.out.println(set.getInt("id"));
+                return taskCourse;
+            } else {
+                return null;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             logger.error("exception in task dao");

@@ -1,6 +1,7 @@
 package db.dao;
 
 import db.dao.exceptions.UserDataDaoException;
+import db.pojo.User;
 
 import java.sql.SQLException;
 
@@ -15,4 +16,9 @@ public interface UserDataDao {
     String getNameUserDataFromIdUser(int id_user) throws SQLException, UserDataDaoException;
 
     String getLastNameUserDataFromIdUser(int id_user) throws SQLException, UserDataDaoException;
+
+    int countTasks(int id_user) throws UserDataDaoException;
+
+    boolean upRank(int id_user) throws UserDataDaoException;
+
 }

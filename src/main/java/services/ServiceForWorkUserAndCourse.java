@@ -1,19 +1,20 @@
 package services;
 
+import ajax.ReviewA;
 import db.dao.*;
 import db.dao.exceptions.CourseDaoException;
 import db.dao.exceptions.TaskCourseDaoException;
 import db.dao.exceptions.UserCourseDaoException;
 import db.dao.exceptions.UserDaoException;
 import db.pojo.TaskCourse;
-import db.pojo.UserCourse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Connection;
 import java.util.*;
 
 import java.sql.SQLException;
+import java.util.stream.Collectors;
+
 @Service
 public class ServiceForWorkUserAndCourse {
     private UserCourseDao userCourseDao;
@@ -71,7 +72,9 @@ public class ServiceForWorkUserAndCourse {
 
     public TaskCourse getTaskFromOfProfilByIdCourse(int id_user, int id_course) throws SQLException, CourseDaoException, TaskCourseDaoException {
         if (!courseDao.checkOfCourseOfUser(id_user, id_course)) {
-            courseDao.addCourseInProfilOrBuyHim(id_user, id_course);
+            if (courseDao.getStatusCourse(id_course)) {
+                courseDao.addCourseInProfilOrBuyHim(id_user, id_course);
+            }
         }
         return taskCourseDao.getTaskByNumberInCourse(
                 taskCourseDao.getNumberTaskInCourse(id_user, id_course),
@@ -107,5 +110,16 @@ public class ServiceForWorkUserAndCourse {
 
     public int getCurrencyTaskByUser(Integer id, int idCourse) throws SQLException, UserCourseDaoException {
         return userCourseDao.getCurrencyIdOfUser(id, idCourse);
+    }
+
+    public boolean putAssessement(Integer idCourse, int id_user, int id_assessement, String review) throws CourseDaoException {
+        return courseDao.toPutAssessement(idCourse, id_user, id_assessement, review);
+    }
+
+    public List<ReviewA> getReviewsOfCourse(int id_course) throws CourseDaoException {
+        List<ReviewA> res =  courseDao.getReviewOfCourse(id_course)
+                .stream()
+                .filter(reviewA -> !reviewA.getReview().equals("")).collect(Collectors.toList());
+        return res;
     }
 }

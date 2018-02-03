@@ -3,6 +3,7 @@ package db.dao;
 import db.connection.ConnectionManager;
 import db.connection.ConnectionManagerPostgres;
 import db.dao.exceptions.UserDataDaoException;
+import db.pojo.User;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -37,10 +38,12 @@ public class UserDataDaoImpl implements UserDataDao {
             statement1.setString(3, birthday);
             ResultSet set = statement1.executeQuery();
             set.next();
+            int id = set.getInt("id");
             connection.close();
             connection1.close();
-            return set.getInt("id");
+            return id;
         } catch (SQLException e) {
+            e.printStackTrace();
             logger.error("exception in userdata dao");
             throw new UserDataDaoException();
         }
@@ -136,4 +139,63 @@ public class UserDataDaoImpl implements UserDataDao {
         }
     }
 
+    @Override
+    public int countTasks(int id_user) throws UserDataDaoException {
+        Connection connection = connectionManager.getConnection();
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement("SELECT " +
+                    "level " +
+                    "from public.user u " +
+                    "WHERE u.id = ?");
+            statement.setInt(1, id_user);
+            ResultSet set = statement.executeQuery();
+            set.next();
+            int currencyTasks  = set.getInt("level");
+            connection.close();
+            Connection connection2 = connectionManager.getConnection();
+            PreparedStatement statement2 = connection2.prepareStatement("UPDATE public.user u " +
+                    "SET level = ? " +
+                    "WHERE u.id = ?");
+            statement2.setInt(1, ++currencyTasks);
+            statement2.setInt(2, id_user);
+            statement2.executeUpdate();
+            connection2.close();
+            return currencyTasks;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            logger.error("exception in userdata dao");
+            throw new UserDataDaoException();
+        }
+    }
+
+    @Override
+    public boolean upRank(int id_user) throws UserDataDaoException {
+        Connection connection = connectionManager.getConnection();
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement("SELECT " +
+                    "id_rank " +
+                    "from public.user u " +
+                    "WHERE u.id = ?");
+            statement.setInt(1, id_user);
+            ResultSet set = statement.executeQuery();
+            set.next();
+            int currencyRank  = set.getInt("id_rank");
+            connection.close();
+            Connection connection2 = connectionManager.getConnection();
+            PreparedStatement statement2 = connection2.prepareStatement("UPDATE public.user u " +
+                    "SET id_rank = ? " +
+                    "WHERE u.id = ?");
+            statement2.setInt(1, ++currencyRank);
+            statement2.setInt(2, id_user);
+            int result = statement2.executeUpdate();
+            connection2.close();
+            return result == 1;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            logger.error("exception in userdata dao");
+            throw new UserDataDaoException();
+        }
+    }
 }

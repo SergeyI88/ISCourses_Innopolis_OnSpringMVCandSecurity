@@ -134,3 +134,7 @@ a:hover {
     background: #990000;
     text-decoration: none;
 }
+
+._hidden {
+    display: none;
+}

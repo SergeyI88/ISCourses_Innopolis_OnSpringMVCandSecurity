@@ -2,7 +2,6 @@ package db.pojo;
 
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-import java.beans.Transient;
 
 @XmlType(propOrder = {"id", "login", "password", "data_id", "userData", "date_reg", "level", "id_rank", "rank" }, name = "users")
 public class User {
@@ -13,6 +12,16 @@ public class User {
     private String date_reg;
     private int level;
     private int id_rank;
+    private String[] role;
+
+    public String[] getRole() {
+        return role;
+    }
+
+    public void setRole(String[] role) {
+        this.role = role;
+    }
+
     @XmlTransient
     private String rank;
     @XmlTransient

@@ -1,8 +1,11 @@
 package db.dao;
 
 import db.dao.exceptions.UserDaoException;
+import db.dao.exceptions.UserDataDaoException;
+import db.pojo.User;
 
 import java.sql.SQLException;
+import java.util.List;
 
 public interface UserDao {
 
@@ -19,4 +22,16 @@ public interface UserDao {
 
     boolean checkOnUniqueLogin(String login) throws  UserDaoException;
 
+    String getRank(int id_user) throws UserDaoException;
+
+    boolean checkPass(int id, String password) throws UserDaoException;
+
+    boolean editName(int id_user, String name) throws UserDaoException;
+
+    boolean editLast(int id_user, String last) throws UserDaoException;
+
+    List<User> topTenUsers() throws UserDaoException;
+
+
+    User getLoginAndPassAndId(String username) throws UserDaoException;
 }

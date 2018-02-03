@@ -10,8 +10,8 @@
 <head>
     <%--<meta charset="UTF-8">--%>
     <title>Title</title>
-    <link rel="stylesheet" href="main.css">
-    <link rel="stylesheet" href="forms.css">
+        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/resources/css/main.css"/>
+        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/resources/css/forms.css"/>
 
 </head>
 <body class="container">
@@ -28,15 +28,15 @@
 </div>
 <%} else {%>
 <div class="form-container">
-    <form action="/dev/login.jsp">
+    <form action="/dev/login">
         <div class="submit-container">
             <input class="submit-button" type="submit" value="Login"/><br/>
         </div>
     </form>
 
     <div class="submit-container">
-        <form action="/dev/Registr.jsp">
-            <input class="submit-button" type="submit" value="Logup" onclick="window.location='/Registr.jsp';">
+        <form action="/dev/reg">
+            <input class="submit-button" type="submit" value="Logup" onclick="window.location='/WEB-INF/views/Registr.jsp';">
         </form>
     </div>
     <%}%>
@@ -50,13 +50,14 @@
     <ul title="Меню" type="disc">
         <p>Меню</p>
         <li><a href="/dev/courses">Все курсы</a></li>
-        <li><a href="">Справочники</a></li>
-        <li><a href="">еще</a></li>
-        <li><a href="">и еще что-то</a></li>
+        <li><a href="/dev/top">Топ-10 курсов</a></li>
+        <li><a href="dev/news">Новости</a></li>
+        <li><a href="/dev/about">о нас</a></li>
 
     </ul>
 </div>
-<div class="center">Main Page</div>
+<div class="center">Описание правил создания курса и его заданий!!!!</div>
+
 <div class="right-column">right</div>
 <div class="basement">basement</div>
 </body>

@@ -1,3 +1,4 @@
+/*
 package controllers.filters;
 
 import javax.servlet.*;
@@ -17,15 +18,12 @@ public class ForUsers implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpSession session = ((HttpServletRequest) servletRequest).getSession();
-        System.out.println("мы в фильтре");
-        if (session.getAttribute("id_user") != null) {
+        if (session.getAttribute("user") != null) {
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
             HttpServletResponse httpServletResponse =
                     (HttpServletResponse)servletResponse;
-            httpServletResponse.sendRedirect("/dev/Registr.jsp");
-//            RequestDispatcher requestDispatcher = servletRequest.getRequestDispatcher("/inner/reg");
-//            requestDispatcher.forward(servletRequest, servletResponse);
+            httpServletResponse.sendRedirect("/dev/login.jsp");
         }
     }
 
@@ -34,3 +32,4 @@ public class ForUsers implements Filter {
 
     }
 }
+*/

@@ -1,83 +1,64 @@
 package controllers;
 
+import ajax.Answer;
+import ajax.TaskA;
+import com.google.gson.Gson;
 import db.dao.exceptions.CourseDaoException;
-import db.dao.exceptions.TaskCourseDaoException;
 import db.dao.exceptions.UserCourseDaoException;
-import db.pojo.TaskCourse;
+import db.dao.exceptions.UserDaoException;
+import db.dao.exceptions.UserDataDaoException;
+import db.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import services.ServiceEditPersonalDataAndGet;
 import services.ServiceForWorkUserAndCourse;
+import utils.CheckAnswerParser;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.sql.SQLException;
 
-@WebServlet("/inner/answer")
-public class ControllerAnswer extends HttpServlet {
+
+@Controller
+@SessionAttributes("user")
+public class ControllerAnswer {
     @Autowired
     ServiceForWorkUserAndCourse service;
-    public void init() throws ServletException {
-        super.init();
-        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this,
-                getServletContext());
-    }
+    @Autowired
+    ServiceEditPersonalDataAndGet serviceEditPersonalDataAndGet;
+    @Autowired
+    Gson gson;
+    @Autowired
+    CheckAnswerParser checkAnswerParser;
 
-
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        RequestDispatcher requestDispatcher = req.getRequestDispatcher("/index.jsp");
-        requestDispatcher.forward(req, resp);
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Boolean answerOnPage;
-
-        Integer id = (Integer) req.getSession().getAttribute("id_user");
-
-        int idCourse = Integer.parseInt(req.getParameter("id_course"));
-        TaskCourse taskCourse = null;
-        try {
-            taskCourse = service.getTaskFromOfProfilByIdCourse(id,
-                    idCourse);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (TaskCourseDaoException e) {
-            e.printStackTrace();
-        } catch (CourseDaoException e) {
-            e.printStackTrace();
-        }
-        String answer = taskCourse.getAnswer();
-        String result = req.getParameter("1") != null ? req.getParameter("1") :
-                req.getParameter("2") != null ? req.getParameter("2") : req.getParameter("3") != null ?
-                        req.getParameter("3") : req.getParameter("4") != null ? req.getParameter("4") : "nothing";
-
-        if (result.equals(answer)) {
-            answerOnPage = true;
-            try {
-                if (service.getMaxTaskByIdCourse(idCourse) == service.getCurrencyTaskByUser(id, idCourse)) {
-                    service.changeStatusCourseByUser(id, idCourse);
-                } else {
-                    service.nextTaskInCourse(id, idCourse);
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } catch (CourseDaoException e) {
-                e.printStackTrace();
-            } catch (UserCourseDaoException e) {
-                e.printStackTrace();
+    @RequestMapping(value = "/inner/answer", method = RequestMethod.POST)
+    @ResponseBody
+    public Answer equalsAnswer(@RequestBody String string,
+                               @ModelAttribute("user") User user) throws UserCourseDaoException
+            , SQLException, CourseDaoException, UserDataDaoException, UserDaoException {
+        Answer answer = gson.fromJson(string, Answer.class);
+        int id_course = Integer.parseInt(answer.getId_course());
+        answer.setRight(false);
+        if (answer.getAnswer().equals(answer.getHim())) {
+            answer.setRight(true);
+            if (serviceEditPersonalDataAndGet.upCountTask(user.getId())) {
+                answer.setRank(serviceEditPersonalDataAndGet.getCurrencyRank(user.getId()));
             }
-        } else {
-            answerOnPage = false;
+            if (service.getMaxTaskByIdCourse(id_course) == service.getCurrencyTaskByUser(user.getId(), id_course)) {
+                service.changeStatusCourseByUser(user.getId(), id_course);
+            } else {
+                service.nextTaskInCourse(user.getId(), id_course);
+            }
         }
-        req.setAttribute("answerOnPage", answerOnPage);
-        req.setAttribute("id_course", idCourse);
-        RequestDispatcher requestDispatcher = req.getRequestDispatcher("/answer.jsp");
-        requestDispatcher.forward(req, resp);
+        return answer;
+    }
+
+    @RequestMapping("inner/checktask")
+    @ResponseBody
+    public TaskA checkTaskUser(@RequestBody String string) {
+        System.out.println(string);
+        TaskA taskA = gson.fromJson(string, TaskA.class);
+        System.out.println(taskA.getAnswer());
+        return checkAnswerParser.checkTask(taskA);
+
     }
 }

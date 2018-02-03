@@ -28,6 +28,11 @@ public class MyAppender extends AppenderSkeleton {
     @Override
     protected void append(LoggingEvent event) {
         try {
+            File file1 = new File("D:/log4j-application.log");
+            if (file1.canRead()) {
+                file = null;
+                file = file1.getPath();
+            }
             BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             String count = reader.readLine();
             int countStrings = 0;
@@ -43,7 +48,7 @@ public class MyAppender extends AppenderSkeleton {
                 writer.flush();
                 writer.close();
             } else {
-                String newFile = file + 1;
+                String newFile = file;
                 FileWriter writer = new FileWriter(newFile, true);
                 writer.write(String.format("%s", layout.format(event)));
                 writer.flush();
@@ -57,9 +62,7 @@ public class MyAppender extends AppenderSkeleton {
     }
 
     @Override
-    public void close() {
-
-    }
+    public void close() {}
 
     @Override
     public boolean requiresLayout() {

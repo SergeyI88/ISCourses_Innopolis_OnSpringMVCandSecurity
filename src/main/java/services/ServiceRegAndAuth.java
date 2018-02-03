@@ -37,7 +37,6 @@ public class ServiceRegAndAuth {
             , String login
             , String password
             , String date_reg) throws SQLException, UserDaoException, UserDataDaoException {
-        userDao = new UserDaoImpl();
         if (!userDao.checkOnUniqueLogin(login)) {
             return false;
         }
@@ -52,7 +51,6 @@ public class ServiceRegAndAuth {
         return true;
     }
     public int auth(String name, String login)throws UserDaoException {
-        userDao = new UserDaoImpl();
         return userDao.auth(name, login);
     }
 }

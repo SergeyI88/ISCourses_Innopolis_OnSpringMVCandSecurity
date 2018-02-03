@@ -2,6 +2,7 @@ package db.pojo;
 
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import java.util.*;
 
 @XmlType(propOrder = {"id", "name", "description", "id_status_of_course", "statusOfCourse"}, name = "courses")
 public class Course {
@@ -11,6 +12,24 @@ public class Course {
     private int id_status_of_course;
     @XmlTransient
     private String statusOfCourse;
+    private double rating;
+    private List<String> reviews;
+
+    public List<String> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(List<String> reviews) {
+        this.reviews = reviews;
+    }
+
+    public double getRating() {
+        return rating;
+    }
+
+    public void setRating(double rating) {
+        this.rating = rating;
+    }
 
     public int getId_status_of_course() {
         return id_status_of_course;

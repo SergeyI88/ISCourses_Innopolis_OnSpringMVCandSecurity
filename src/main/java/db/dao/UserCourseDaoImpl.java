@@ -27,11 +27,15 @@ public class UserCourseDaoImpl implements UserCourseDao {
             statement.setInt(1, id);
             statement.setInt(2, idCourse);
             ResultSet set = statement.executeQuery();
-            set.next();
+            boolean result = set.next();
+            if (!result) {
+                return false;
+            }
             int res = set.getInt("id_status");
             System.out.println(res + " cstyatus");
             return 2 != res;
         } catch (SQLException e) {
+            e.printStackTrace();
             logger.error("exception in usercourse dao");
             throw new UserCourseDaoException();
         }

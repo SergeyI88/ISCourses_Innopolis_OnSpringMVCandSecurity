@@ -1,5 +1,6 @@
 package db.dao;
 
+import ajax.ReviewA;
 import db.connection.ConnectionManager;
 import db.connection.ConnectionManagerPostgres;
 import db.dao.exceptions.CourseDaoException;
@@ -8,6 +9,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.xml.transform.Result;
 import java.sql.*;
 import java.util.*;
 @Component
@@ -24,7 +26,7 @@ public class CourseDaoImpl implements CourseDao {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement("SELECT " +
-                    "c.id, c.name as name_course, c.description as desc_course, soc.name as name_status " +
+                    "c.id, c.name as name_course, c.description as desc_course, c.id_status_of_course, soc.name as name_status " +
                     "FROM course c " +
                     "INNER JOIN s_status_of_course soc ON soc.id = c.id_status_of_course");
             ResultSet set = preparedStatement.executeQuery();
@@ -32,6 +34,7 @@ public class CourseDaoImpl implements CourseDao {
                 Course course = new Course();
                 course.setId(set.getInt("id"));
                 course.setName(set.getString("name_course"));
+                course.setId_status_of_course(set.getInt("id_status_of_course"));
                 course.setDescription(set.getString("desc_course"));
                 course.setStatusOfCourse(set.getString("name_status"));
                 subCourses.add(course);
@@ -39,6 +42,7 @@ public class CourseDaoImpl implements CourseDao {
             connection.close();
             return subCourses;
         } catch (SQLException e) {
+            e.printStackTrace();
             logger.error("exception dao course");
             throw new CourseDaoException();
         }
@@ -109,15 +113,14 @@ public class CourseDaoImpl implements CourseDao {
             preparedStatement.setInt(1, id_user);
             preparedStatement.setInt(2, id_sub_course);
             ResultSet set = preparedStatement.executeQuery();
-            if (set.next()) {
-                return true;
-            }
+            boolean res = set.next();
+            System.out.println(res + "result");
             connection.close();
+            return res;
         } catch (SQLException e) {
             logger.error("exception dao course");
             throw new CourseDaoException();
         }
-        return false;
     }
 
     @Override
@@ -127,26 +130,29 @@ public class CourseDaoImpl implements CourseDao {
     }
 
     @Override
-    public boolean toPutAssessement(int id_course, int id_user, int id_assessement) throws CourseDaoException {
+    public boolean toPutAssessement(int id_course, int id_user, int id_assessement, String review) throws CourseDaoException {
         Connection connectionForCheck = connectionManager.getConnection();
         PreparedStatement statement = null;
         try {
             statement = connectionForCheck.prepareStatement("SELECT " +
-                    "id FROM raiting_course WHERE id_course = ? AND id_user = ?");
+                    "id FROM review WHERE id_course = ? AND id_user = ?");
             statement.setInt(1, id_course);
             statement.setInt(2, id_user);
-            if (statement.execute()) {
+            ResultSet set = statement.executeQuery();
+            if (set.next()) {
                 return false;
             }
             Connection connection = connectionManager.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO " +
-                    "raiting_course VALUES (DEFAULT, ?, ?, ?)");
+                    "review VALUES (DEFAULT, ?, ?, ?, ?)");
             preparedStatement.setInt(1, id_course);
             preparedStatement.setInt(2, id_user);
             preparedStatement.setInt(3, id_assessement);
+            preparedStatement.setString(4, review);
             preparedStatement.execute();
             connection.close();
         } catch (SQLException e) {
+            e.printStackTrace();
             logger.error("exception dao course");
             throw new CourseDaoException();
         }
@@ -159,25 +165,73 @@ public class CourseDaoImpl implements CourseDao {
         List<Course> topCourses = null;
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("SELECT " +
-                    "  c.name, " +
-                    "  c.description, " +
-                    "  soc.name, " +
+                    "  c.name as name_course, " +
+                    "  c.id, " +
+                    "  c.description as desc_course, " +
+                    "  soc.name as name_status, " +
+                    "  avg(rc.id_assessement) " +
+                    "  FROM review rc " +
+                    "  INNER JOIN " +
+                    "  course c ON c.id = rc.id_course " +
+                    "  INNER JOIN " +
+                    "  s_status_of_course soc ON soc.id = c.id_status_of_course " +
+                    "GROUP BY c.id, c.description, soc.name " +
+                    "ORDER BY avg DESC " +
+                    "LIMIT 10;");
+            topCourses = new ArrayList<>();
+            ResultSet set = preparedStatement.executeQuery();
+            while (set.next()) {
+                Course course = new Course();
+                course.setId(set.getInt("id"));
+                course.setName(set.getString("name_course"));
+                course.setDescription(set.getString("desc_course"));
+                course.setStatusOfCourse(set.getString("name_status"));
+                course.setRating(set.getInt("avg"));
+                topCourses.add(course);
+            }
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            logger.error("exception dao course");
+            throw new CourseDaoException();
+        }
+        return topCourses;
+    }
+    @Override
+    public List<Course> returnAllList() throws CourseDaoException {
+        Connection connection = connectionManager.getConnection();
+        List<Course> courses = null;
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT " +
+                    "c.id, c.name as name_course, c.description as desc_course, c.id_status_of_course, " +
+                    "  soc.name as name_status, " +
                     "  avg(rc.id_assessement)" +
-                    "FROM raiting_course rc " +
+                    "FROM review rc " +
                     "  INNER JOIN " +
                     "  course c ON c.id = rc.id_course " +
                     "  INNER JOIN " +
                     "  s_status_of_course soc ON soc.id = c.id_status_of_course " +
                     "GROUP BY c.id, c.description, soc.name " +
                     "ORDER BY c.id DESC " +
-                    "LIMIT 10;");
+                    ";");
+            courses = new ArrayList<>();
+            ResultSet set = preparedStatement.executeQuery();
+            while (set.next()) {
+                Course course = new Course();
+                course.setId(set.getInt("id"));
+                course.setName(set.getString("name_course"));
+                course.setId_status_of_course(set.getInt("id_status_of_course"));
+                course.setDescription(set.getString("desc_course"));
+                course.setStatusOfCourse(set.getString("name_status"));
+                course.setRating(set.getDouble("avg"));
+                courses.add(course);
+            }
             connection.close();
-            topCourses = new ArrayList<>();
         } catch (SQLException e) {
             logger.error("exception dao course");
             throw new CourseDaoException();
         }
-        return topCourses;
+        return courses;
     }
 
     @Override
@@ -196,6 +250,54 @@ public class CourseDaoImpl implements CourseDao {
         } catch (SQLException e) {
             e.printStackTrace();
             logger.error("exception dao course");
+            throw new CourseDaoException();
+        }
+    }
+
+    @Override
+    public boolean getStatusCourse(int id_course) throws CourseDaoException {
+       Connection connection = connectionManager.getConnection();
+        try {
+            PreparedStatement statement = connection.prepareStatement("SELECT id_status_of_course " +
+                    "FROM course WHERE id = ?");
+            statement.setInt(1, id_course);
+            ResultSet set = statement.executeQuery();
+            set.next();
+            if (set.getInt("id_status_of_course") == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            logger.error("exception in dao Course");
+            throw new CourseDaoException();
+        }
+    }
+
+    @Override
+    public List<ReviewA> getReviewOfCourse(int id_course) throws CourseDaoException {
+        Connection connection = connectionManager.getConnection();
+        try {
+            PreparedStatement statement = connection.prepareStatement("SELECT r.id_assessement, r.review," +
+                    "u.login " +
+                    "FROM review r INNER JOIN " +
+                    "public.user u ON u.id = r.id_user " +
+                    "WHERE r.id_course = ?");
+            statement.setInt(1, id_course);
+            ResultSet set = statement.executeQuery();
+            List<ReviewA> list = new ArrayList<>();
+            while (set.next()) {
+                ReviewA reviewA = new ReviewA();
+                reviewA.setLogin(set.getString("login"));
+                reviewA.setId_assessement(set.getInt("id_assessement"));
+                reviewA.setReview(set.getString("review"));
+                list.add(reviewA);
+            }
+            return list;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            logger.error("exception in dao Course");
             throw new CourseDaoException();
         }
     }

@@ -1,5 +1,6 @@
 package db.dao;
 
+import ajax.ReviewA;
 import db.dao.exceptions.CourseDaoException;
 import db.pojo.Course;
 
@@ -19,9 +20,17 @@ public interface CourseDao {
 
     Course returnCourseWithAllTasks(int id_course);
 
-    boolean toPutAssessement(int id_course, int id_user, int id_assessement) throws SQLException, CourseDaoException;
+
+    boolean toPutAssessement(int id_course, int id_user, int id_assessement, String review) throws CourseDaoException;
 
     List<Course> returnTopTen() throws SQLException, CourseDaoException;
 
+
+    List<Course> returnAllList() throws CourseDaoException;
+
     int getMaxCountTasksByIdCourse(int idCourse) throws SQLException, CourseDaoException;
+
+    boolean getStatusCourse(int id_course) throws CourseDaoException;
+
+    List<ReviewA> getReviewOfCourse(int id_course) throws CourseDaoException;
 }
