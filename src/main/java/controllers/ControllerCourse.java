@@ -12,6 +12,8 @@ import db.pojo.Course;
 import db.pojo.TaskCourse;
 import db.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
@@ -103,7 +105,7 @@ public class ControllerCourse extends HttpServlet {
         CourseA courseA = gson.fromJson(string, CourseA.class);
         return serviceForWorkTempTable.addCourse(courseA);
     }
-
+    @Secured(value = {"role_admin"})
     @RequestMapping(value = "/inner/shownewcourses")
     public ModelAndView showNewCourses() throws SQLException, CourseDaoException {
         ModelAndView modelAndView = new ModelAndView("new_courses");
@@ -129,7 +131,7 @@ public class ControllerCourse extends HttpServlet {
         modelAndView.addObject("courses", courses);
         return modelAndView;
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @RequestMapping(value = "/inner/good", method = RequestMethod.POST)
     public ModelAndView accept(@RequestParam CourseA courseA) throws TempDAOException {
 
@@ -137,7 +139,7 @@ public class ControllerCourse extends HttpServlet {
         ModelAndView modelAndView = new ModelAndView("new_courses");
         return modelAndView;
     }
-
+    @PreAuthorize("role_admin")
     @RequestMapping(value = "/inner/bad", method = RequestMethod.POST)
     public ModelAndView cancell(@RequestParam CourseA courseA) {
         try {

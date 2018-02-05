@@ -121,7 +121,7 @@
         %>  <%= session.getAttribute("last_name").toString()%>
         </p>
         <div class="submit-container">
-            <form method="post" action="/dev/inner/LogOut"><input type="submit" value="LogOut"></form>
+            <form method="post" action="/dev/inner/logout"><input type="submit" value="LogOut"></form>
         </div>
     </div>
 </div>
@@ -158,7 +158,6 @@
         </ul>
     </div>
 </div>
-<div class="right-column">right</div>
 <div class="basement">basement</div>
 </body>
 </html>

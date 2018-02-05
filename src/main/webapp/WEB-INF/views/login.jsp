@@ -8,7 +8,9 @@
 </head>
 
 <body class="container">
+<div class="title"><h2>Войдите и получите бесценный опыт.</h2></div>
 <form class="form-container" method="post" action="/dev/login">
+    <%--<input name="${_csrf.parameterName}" type="hidden" value="${_csrf.token}">--%>
     <div class="form-title"><h2>Sign up</h2></div>
     <div class="form-title">Login</div>
     <input class="form-field" type="text" name="username" id="username" value="login"/><br/>

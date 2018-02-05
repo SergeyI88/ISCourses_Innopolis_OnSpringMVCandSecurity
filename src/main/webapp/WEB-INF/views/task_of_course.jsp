@@ -176,7 +176,7 @@
     $('#id_courseC').val(), $('#comment').val())">
     </form>
 </div>
-<div class="right-column">right</div>
+
 <div class="basement">basement</div>
 </body>
 </html>

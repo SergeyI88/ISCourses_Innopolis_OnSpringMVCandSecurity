@@ -8,21 +8,27 @@
     http://www.springframework.org/schema/beans
     http://www.springframework.org/schema/beans/spring-beans-4.2.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <!--<global-method-security secured-annotations="enabled"/>-->
+    <global-method-security secured-annotations="enabled"/>
 
     <http auto-config="true">
         <csrf disabled="true"/>
-        <intercept-url pattern="/inner/**" access="isAuthenticated()"/>
-        <form-login login-page="/access"
+        <intercept-url pattern="/inner/pr" access="isAuthenticated()"/>
+        <intercept-url pattern="/inner/shownewcourses" access="hasRole('role_admin')"/>
+
+        <form-login login-page="/login"
                     username-parameter="username"
                     password-parameter="userpass"
                     default-target-url="/inner/pr"
                     always-use-default-target="true"
                     authentication-failure-url="/login?error=fuck you"/>
+        <logout invalidate-session="true"
+                logout-url="/inner/logout"
+                logout-success-url="/login"
+                />
         <csrf disabled="true"/>
     </http>
     <beans:bean id="authProvider" class="configs.CustomAuthProvider"/>
-    <beans:bean id="myUserDetailsService" class="configs.MyUserDetailsService"/>
+    <!--<beans:bean id="myUserDetailsService" class="configs.MyUserDetailsService"/>-->
     <context:component-scan base-package="configs"/>
     <authentication-manager>
         <authentication-provider ref="authProvider">

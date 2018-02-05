@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 import services.ServiceRegAndAuth;
+import utils.MyPasswordEncoder;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -24,6 +25,10 @@ import java.util.Date;
 public class ControllerReg {
     @Autowired
     private ServiceRegAndAuth serviceRegAndAuth;
+    @Autowired
+    MyPasswordEncoder myPasswordEncoder;
+
+
     @RequestMapping(value = "/reg", method = RequestMethod.POST)
 
     public String reg(@RequestBody String user) {
@@ -36,10 +41,9 @@ public class ControllerReg {
                     , userReg.getLast_name()
                     , "any"
                     , userReg.getLogin()
-                    , userReg.getPass()
+                    , myPasswordEncoder.encode(userReg.getPass())
                     , new Date(System.currentTimeMillis() * 1000).toString());
             if (res) {
-                System.out.println("отдаем");
                 return "succes";
             }
         } catch (UserDataDaoException e1) {

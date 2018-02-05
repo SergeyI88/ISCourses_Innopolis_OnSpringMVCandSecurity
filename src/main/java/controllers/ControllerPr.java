@@ -4,17 +4,11 @@ import ajax.ListTopUsers;
 import ajax.UserA;
 import db.pojo.User;
 import com.google.gson.Gson;
-import com.sun.deploy.net.proxy.UserDefinedProxyConfig;
-import configs.UserInside;
-import db.dao.exceptions.CourseDaoException;
 import db.dao.exceptions.UserDaoException;
 import db.dao.exceptions.UserDataDaoException;
-import db.pojo.Course;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import org.springframework.stereotype.Controller;
@@ -24,7 +18,6 @@ import services.ServiceEditPersonalDataAndGet;
 import services.ServiceForWorkUserAndCourse;
 
 import java.sql.SQLException;
-import java.util.List;
 
 @Controller
 @SessionAttributes(value = {"user", "name", "last_name"})
@@ -36,22 +29,21 @@ public class ControllerPr {
     @Autowired
     Gson gson;
 
-    //    @RequestMapping("/inner/pr")
-//    public ModelAndView pr(@ModelAttribute("user") User user) throws SQLException, UserDataDaoException {
-//        ModelAndView modelAndView = new ModelAndView("pr");
-//        modelAndView.addObject("name", serviceEditPersonalDataAndGet.getName(user.getId()));
-//        modelAndView.addObject("last_name", serviceEditPersonalDataAndGet.getLastName(user.getId()));
-//        modelAndView.addObject("admin", "admin");
-//        return modelAndView;
-//    }
     @RequestMapping("/inner/pr")
-    public ModelAndView pr(@AuthenticationPrincipal(expression = "userInside") UserInside user) throws SQLException
+    public ModelAndView pr() throws SQLException
             , UserDataDaoException {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//        User user1 =  auth.getPrincipal();
+        User user =
+                ((User) SecurityContextHolder
+                       .getContext()
+                       .getAuthentication()
+                       .getPrincipal());
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        authentication.getPrincipal();
         ModelAndView modelAndView = new ModelAndView("pr");
-        modelAndView.addObject("name", serviceEditPersonalDataAndGet.getName(user.getUser_id()));
-        modelAndView.addObject("last_name", serviceEditPersonalDataAndGet.getLastName(user.getUser_id()));
+        modelAndView.addObject("name", serviceEditPersonalDataAndGet.getName(user.getId()));
+        modelAndView.addObject("user", user);
+        modelAndView.addObject("last_name", serviceEditPersonalDataAndGet.getLastName(user.getId()));
         modelAndView.addObject("admin", "admin");
         return modelAndView;
     }
